@@ -1,32 +1,39 @@
-const path = require('path');
-const { runCommand } = require('./cross-plattform');
+const { exec } = require('child_process');
+const AUTOHOTKEY_PATH = '"C:\Program Files\AutoHotkey\UX\AutoHotkeyUX.exe"';
 
-function autoHotKey(scriptName, argument) {
-    // Path to the AutoHotKey script in the 'ahk-scripts' subfolder
-    const scriptPath = path.join(PROJECT_DIR, 'ahk-scripts', scriptName);
+const autoKey = (key) => {
+    const command = `${AUTOHOTKEY_PATH} ${key}`;
+    exec(command, (err, stdout, stderr) => {
+        if (err) {
+            console.error(`Error executing AutoHotkey command: ${command}`, err);
+            return;
+        }
+        console.log(`AutoHotkey command output: ${stdout}`);
+    });
+};
 
-    // Command to start the AutoHotKey script
-    const command = `${AUTOHOTKEY_PATH} "${scriptPath}" ${argument}`;
+const copy = () => {
+    const script = 'Send ^c'; // AutoHotkey script for Ctrl+C
+    const command = `${AUTOHOTKEY_PATH} ${script}`;
+    exec(command, (err, stdout, stderr) => {
+        if (err) {
+            console.error(`Error executing AutoHotkey copy command: ${command}`, err);
+            return;
+        }
+        console.log(`AutoHotkey copy command output: ${stdout}`);
+    });
+};
 
-    // Execute the command
-    runCommand(command);
-}
+const paste = () => {
+    const script = 'Send ^v'; // AutoHotkey script for Ctrl+V
+    const command = `${AUTOHOTKEY_PATH} ${script}`;
+    exec(command, (err, stdout, stderr) => {
+        if (err) {
+            console.error(`Error executing AutoHotkey paste command: ${command}`, err);
+            return;
+        }
+        console.log(`AutoHotkey paste command output: ${stdout}`);
+    });
+};
 
-function copy() {
-    autoHotKey('copy.ahk');
-}
-
-function paste() {
-    autoHotKey('paste.ahk');
-}
-
-function undo() {
-    autoHotKey('undo.ahk');
-}
-
-module.exports = {
-    autoHotKey,
-    copy,
-    paste,
-    undo,
-};  
+module.exports = { autoKey, copy, paste };

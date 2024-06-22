@@ -1,13 +1,5 @@
-const { runCommand } = require("./cross-plattform");
+const macShortcut = (shortcut) => {
+    // Implement macOS specific shortcut logic here
+};
 
-
-function macShortcut(shortcutName) {
-    return () => {
-        // See https://support.apple.com/de-de/guide/shortcuts-mac/apd455c82f02/mac
-        runCommand(`shortcuts run "${shortcutName}" &`);
-    }
-}
-
-module.exports = {
-    macShortcut,
-};  
+module.exports = { macShortcut };
