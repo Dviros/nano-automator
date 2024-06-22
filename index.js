@@ -1,19 +1,20 @@
-const { SerialPort } = require('serialport');
-const { initializeSerialPort } = require('./service');
-const { getFilteredPorts } = require('./list-ports');
+const express = require('express');
+const app = express();
+const config = require('./config');
+const routes = require('./routes');
 
-async function main() {
-  try {
-    const filteredPorts = await getFilteredPorts(SerialPort);
-    if (filteredPorts.length === 0) {
-      console.error('No Nano_D++ found');
-      return;
-    }
-    const nanoPort = filteredPorts[0].path;
-    initializeSerialPort(SerialPort, nanoPort);
-  } catch (err) {
-    console.error('Error:', err);
-  }
-}
+app.use('/api', routes);
 
-main();
+app.listen(config.port, () => {
+    console.log(`Server running on port ${config.port}`);
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+    process.exit(1); // Mandatory (as per the Node.js docs)
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    process.exit(1); // Optional: exit the process after logging
+});

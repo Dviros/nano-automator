@@ -1,44 +1,23 @@
+const Joi = require('joi');
 
-const { knobTurned, macOS, windows, keyDown, profileIs } = require('./conditions/cross-plattform');
-const { runCommand, playPause, nextTrack, setVolume, lockComputer } = require('./actions/cross-plattform');
-const { autoKey, copy, paste } = require('./actions/windows');
-const { macShortcut } = require('./actions/macOS');
+const configSchema = Joi.object({
+    port: Joi.number().default(3000),
+    serialPort: Joi.string().required(),
+    baudRate: Joi.number().default(9600),
+    // Add other configurations here
+});
 
+const config = {
+    port: process.env.PORT || 3000,
+    serialPort: process.env.SERIAL_PORT || '/dev/tty-usbserial1',
+    baudRate: process.env.BAUD_RATE || 9600,
+    // Add other configurations here
+};
 
-const AUTOHOTKEY_PATH = '"C:\\Program Files\\AutoHotkey\\UX\\AutoHotkeyUX.exe"';
+const { error, value } = configSchema.validate(config);
 
-const MAPPINGS = [
-    {
-        condition: [knobTurned],
-        action: setVolume
-    },
-    {
-        condition: [keyDown(0)],
-        action: lockComputer,
-    },
-    {
-        condition: [macOS, keyDown(1)],
-        action: macShortcut('Bürolicht an/aus'),
-    },
-    {
-        condition: [macOS, keyDown(2)],
-        action: playPause,
-    },
-    {
-        condition: [macOS, keyDown(3)],
-        action: nextTrack,
-    },
-    {
-        condition: [windows, keyDown(2)],
-        action: copy,
-    },
-    {
-        condition: [windows, keyDown(3)],
-        action: paste,
-    },
-]
+if (error) {
+    throw new Error(`Config validation error: ${error.message}`);
+}
 
-module.exports = {
-    AUTOHOTKEY_PATH,
-    MAPPINGS,
-};  
+module.exports = value;

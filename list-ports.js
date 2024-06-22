@@ -1,17 +1,15 @@
-async function getFilteredPorts(serialPort) {
-  try {
-    const ports = await serialPort.list();
-    const filteredPorts = ports.filter(
-      port => (port.vendorId?.toLowerCase() === '239a' && port.productId === '8010') ||
-              (port.vendorId?.toLowerCase() === '303a' && port.productId === '1001')
-    );
-    return filteredPorts;
-  } catch (err) {
-    console.error('Error listing ports:', err);
-    return [];
-  }
-}
+const SerialPort = require('serialport');
 
-module.exports = {
-  getFilteredPorts
-};
+SerialPort.list()
+  .then(ports => {
+    if (ports.length === 0) {
+      console.log('No serial ports found.');
+    } else {
+      ports.forEach(port => {
+        console.log(`Port: ${port.path}, Manufacturer: ${port.manufacturer || 'Unknown'}, Serial Number: ${port.serialNumber || 'Unknown'}`);
+      });
+    }
+  })
+  .catch(err => {
+    console.error('Error listing serial ports:', err.message);
+  });

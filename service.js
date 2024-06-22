@@ -1,39 +1,35 @@
-const { ReadlineParser } = require('@serialport/parser-readline');
-const { exec } = require('child_process');
-const path = require('path');
-const { executeMappings } = require('./mapping');
-const { AUTOHOTKEY_PATH, MAPPINGS } = require('./config');
+const SerialPort = require('serialport');
+const config = require('./config');
 
-const PROJECT_DIR = __dirname;
+function openSerialPort() {
+    const port = new SerialPort(config.serialPort, {
+        baudRate: config.baudRate,
+        autoOpen: false
+    });
 
+    port.open(err => {
+        if (err) {
+            console.error('Error opening serial port:', err.message);
+            return;
+        }
+        console.log('Serial port opened');
+    });
 
+    port.on('data', handleData);
+    port.on('error', handleError);
 
-function initializeSerialPort(serialPort, nanoPort) {
-  const port = new serialPort({
-    path: nanoPort,
-    baudRate: 9600,
-  });
+    return port;
+}
 
-  const parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
+function handleData(data) {
+    console.log('Data received:', data.toString());
+    // Add your data handling logic here
+}
 
-  port.on('open', () => {
-    console.log('Serial port open');
-  });
-
-  parser.on('data', data => {
-    try {
-      const json = JSON.parse(data);
-      executeMappings(MAPPINGS, json);
-    } catch (e) {
-      console.log(`Error parsing JSON: ${data}`);
-    }
-  });
-
-  port.on('error', err => {
-    console.error('Error: ', err.message);
-  });
+function handleError(err) {
+    console.error('Serial port error:', err.message);
 }
 
 module.exports = {
-  initializeSerialPort
+    openSerialPort,
 };
